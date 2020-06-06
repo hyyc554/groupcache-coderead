@@ -36,6 +36,7 @@ const defaultBasePath = "/_groupcache/"
 const defaultReplicas = 50
 
 // HTTPPool implements PeerPicker for a pool of HTTP peers.
+// 承载节点间 HTTP 通信的核心数据结构
 type HTTPPool struct {
 	// Context optionally specifies a context for the server to use when it
 	// receives a request.
@@ -48,6 +49,7 @@ type HTTPPool struct {
 	Transport func(context.Context) http.RoundTripper
 
 	// this peer's base URL, e.g. "https://example.net:8000"
+	// 本地节点的地址
 	self string
 
 	// opts specifies the options.
@@ -59,17 +61,21 @@ type HTTPPool struct {
 }
 
 // HTTPPoolOptions are the configurations of a HTTPPool.
+// http服务器的一些配置选项
 type HTTPPoolOptions struct {
 	// BasePath specifies the HTTP path that will serve groupcache requests.
 	// If blank, it defaults to "/_groupcache/".
+	//节点间通讯地址的前缀，默认是 /_geecache/
 	BasePath string
 
 	// Replicas specifies the number of key replicas on the consistent hash.
 	// If blank, it defaults to 50.
+	// 一些关于一直性哈希的配置项
 	Replicas int
 
 	// HashFn specifies the hash function of the consistent hash.
 	// If blank, it defaults to crc32.ChecksumIEEE.
+
 	HashFn consistenthash.Hash
 }
 
