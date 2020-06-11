@@ -41,6 +41,14 @@ type HTTPPool struct {
 	// Context optionally specifies a context for the server to use when it
 	// receives a request.
 	// If nil, the server uses the request's context
+	/*
+	网络请求Request，
+	每个Request都需要开启一个goroutine做一些事情，
+	这些goroutine又可能会开启其他的goroutine。
+	可以通过Context，来跟踪这些goroutine，
+	并且通过Context来控制他们的目的，这就是Go语言为我们提供的Context，
+	中文可以称之为“上下文”
+	*/
 	Context func(*http.Request) context.Context
 
 	// Transport optionally specifies an http.RoundTripper for the client
@@ -52,11 +60,14 @@ type HTTPPool struct {
 	// 本地节点的地址
 	self string
 
-	// opts specifies the options.
+	// opts specifies the options.　一些http的选项设置
 	opts HTTPPoolOptions
 
-	mu          sync.Mutex // guards peers and httpGetters
-	peers       *consistenthash.Map
+	mu          sync.Mutex // guards peers and httpGetters 用来防止缓存击穿
+	peers       *consistenthash.Map   // 一致性哈希算法的 Map，用来根据具体的 key 选择节点
+   //	映射远程节点与对应的 httpGetter。
+   // 每一个远程节点对应一个 httpGetter，
+   // 因为 httpGetter 与远程节点的地址 baseURL 有关
 	httpGetters map[string]*httpGetter // keyed by e.g. "http://10.0.0.2:8008"
 }
 
@@ -74,8 +85,8 @@ type HTTPPoolOptions struct {
 	Replicas int
 
 	// HashFn specifies the hash function of the consistent hash.
-	// If blank, it defaults to crc32.ChecksumIEEE.
-
+	// If blank, it defaults to crc32.ChecksumIEEE. 
+	// 实现一致性哈希算法
 	HashFn consistenthash.Hash
 }
 
